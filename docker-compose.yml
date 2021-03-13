@@ -1,0 +1,71 @@
+version: '3'
+services:
+    web:
+        image: magento2-docker_web
+        # build: ./php7.4-apache
+        # image: sorabh86/php7.4-apache:ubuntu-20.04
+        container_name: web
+        restart: always
+        # user: application
+        # environment:
+        #   - WEB_ALIAS_DOMAIN=localhost
+        #   - WEB_DOCUMENT_ROOT=/app/pub
+        #   - PHP_DATE_TIMEZONE=EST
+        #   - PHP_DISPLAY_ERRORS=1
+        #   - PHP_MEMORY_LIMIT=2048M
+        #   - PHP_MAX_EXECUTION_TIME=300
+        #   - PHP_POST_MAX_SIZE=500M
+        #   - PHP_UPLOAD_MAX_FILESIZE=1024M
+        volumes:
+          - ./magento:/var/www/html:cached
+        ports:
+          - 80:80
+          - 443:443
+        links:
+          - mysql
+    mysql:
+        # image: mariadb:10.4
+        image: mysql:8
+        container_name: mysql
+        command: --default-authentication-plugin=mysql_native_password
+        restart: always
+        ports:
+          - 3306:3306
+        environment:
+          - MYSQL_ROOT_PASSWORD=root
+          - MYSQL_DATABASE=magento
+        # volumes:
+        #   - db-data:/var/lib/mysql
+    # phpmyadmin:
+    #     container_name: phpmyadmin
+    #     restart: always
+    #     image: phpmyadmin/phpmyadmin:latest
+    #     environment:
+    #       - MYSQL_ROOT_PASSWORD=root
+    #       - PMA_USER=root
+    #       - PMA_PASSWORD=root
+    #     ports:
+    #       - 8080:80
+    #     links:
+    #       - mysql:db
+    #     depends_on:
+    #       - mysql
+    elasticsearch:
+      # image: elasticsearch:7.11.1
+      # build: ./elasticsearch4G
+      image: magento2-docker_elasticsearch
+      container_name: elasticsearch
+      # entrypoint: ["/bin/bash","-c"]
+      # command: bash -c 'echo "hello world"'
+          # "sed -i 's/## -Xms4g/-Xms4g/' /usr/share/elasticsearch/config/jvm.options 
+          # && sed -i 's/## -Xmx4g/-Xmx4g/' /usr/share/elasticsearch/config/jvm.options"
+      restart: always
+      ports:
+        - 9200:9200
+        - 9300:9300
+      environment: 
+        - discovery.type=single-node
+
+volumes:
+    db-data:
+        external: false
